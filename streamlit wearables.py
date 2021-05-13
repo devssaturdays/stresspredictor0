@@ -1,3 +1,5 @@
+!pip install joblib
+
 import joblib
 import math
 import pandas as pd
@@ -50,16 +52,16 @@ def update():
 
 	val.hrv_MEAN_RR = hrv_MEAN_RR
 
-	for i in sliders:
-		val[i[0]] = i[1]
+	#for i in sliders:				# AJUSTAR OTROS PARAMETROS SEGUN LOS MODIFICADOS
+	#	val[i[0]] = i[1]
 
-		for col in range(len(val.columns)):
-			if(corr[i[0]][col] != 1):
-				val[val.columns[col]] = val[val.columns[col]] + ((i[1]-meanVal[i[0]])*corr[i[0]][col])
-				if val[val.columns[col]][0] > maxVal[maxVal.columns[col]][0]:
-					val[val.columns[col]] = maxVal[maxVal.columns[col]]
-				elif val[val.columns[col]][0]< minVal[minVal.columns[col]][0]:
-					val[val.columns[col]] = minVal[minVal.columns[col]]
+	#	for col in range(len(val.columns)):
+	#		if(corr[i[0]][col] != 1):
+	#			val[val.columns[col]] = val[val.columns[col]] + ((i[1]-meanVal[i[0]])*corr[i[0]][col])
+	#			if val[val.columns[col]][0] > maxVal[maxVal.columns[col]][0]:
+	#				val[val.columns[col]] = maxVal[maxVal.columns[col]]
+	#			elif val[val.columns[col]][0]< minVal[minVal.columns[col]][0]:
+	#				val[val.columns[col]] = minVal[minVal.columns[col]]
 
 	for i in sliders:
 		val[i[0]] = i[1]
