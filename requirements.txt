@@ -1,4 +1,4 @@
 streamlit==0.81.0
 pandas==1.2.3
 joblib==1.0.1
-sklearn>0.1.0
+sklearn
