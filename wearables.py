@@ -25,45 +25,83 @@ def rr_to_hb(rr):
 	rr = rr*1000*60
 	return rr
 
+
+st.set_page_config(layout="wide")
 st.write("Stress Wearables")
-hrv_MEAN_RR = st.slider("Latidos por minuto", math.floor(rr_to_hb(minVal.hrv_MEAN_RR)), math.floor(rr_to_hb (maxVal.hrv_MEAN_RR)) + 1, step = 1)
+
+left, right = st.beta_columns(2)
+
+hrv_MEAN_RR = right.slider("Latidos por minuto", math.floor(rr_to_hb(minVal.hrv_MEAN_RR)), math.floor(rr_to_hb (maxVal.hrv_MEAN_RR)) + 1, step = 1)
 hrv_MEAN_RR = 1/(hrv_MEAN_RR/1000/60)
 
+right.markdown(
+	"<center><img src ='https://upload.wikimedia.org/wikipedia/commons/e/e2/Polar_RC3_GPS_heart_rate_monitor_watch.JPG' style = 'width : 25%;'> <br> Image source: <a href = 'https://search.creativecommons.org/photos/2aaefd10-2fae-4df0-877d-c3adbca1f346'>Tristan Haskins</a></center", 
+	unsafe_allow_html=True)
+
 sliders = []
-def addSli(var, text):
-	sliders.append([
-		var,
-		st.slider(text, math.floor(minVal[var]) + 0.0, math.floor(maxVal[var]) + 1.0, step = math.floor(maxVal[var]-minVal[var])/10 )
-		])
+def addSli(var, text, place = None):
 
-addSli("hrv_KURT", "Curtosis en la activdad cardiaca")
+	minim = float(minVal[var])
+	maxim = float(maxVal[var])
 
-addSli("eda_MEAN", "Actividad electrodermica")
+	inc = 0
+	while maxim - minim < 0.1:
+		maxim = maxim*10
+		minim = minim*10
+		inc = inc+1
+	if inc > 0:
+		text = text+" · 10^"+str(inc)
 
-addSli("eda_KURT", "Curtosis en la actividad electrodermica")
+	if place :
+		sliders.append([
+			var,
+			place.slider(text, minim, maxim, step = (maxim-minim)/10 )
+			])
+
+	else:
+		sliders.append([
+			var,
+			st.slider(text, minim, maxim, step = (maxim-minim)/10 )
+			])
+
+addSli("eda_MEAN", "Actividad electrodermica media", left)
+left.markdown(
+	"<center><img src ='https://live.staticflickr.com/7068/6949070181_592e6b60fd_b.jpg' style = 'width : 40%;'> <br> Image source: <a href = 'https://search.creativecommons.org/photos/fc29cf47-bfc5-4ea4-832e-36d8c58b5de6'>Nikki Pugh</a></center", 
+	unsafe_allow_html=True)
 
 
-state = st.selectbox("Situación actual",("Normal","Emocionado", "Estresado", "Meditando"))
+sc = ["hrv_MEAN_RR", "eda_MEAN", "baseline", "meditation", "stress", "amusement", "hrv_KURT_SQUARE", "eda_MEAN_2ND_GRAD_CUBE"]   #special cases
+
+state = left.selectbox("Situación actual",("Normal","Emocionado", "Estresado", "Meditando"))
+
+with st.beta_expander("Configuración avanzada"):
+	col1, col2, col3 = st.beta_columns(3)
+	num = len(val.columns)//3
+
+	for i in val.columns[:num]:
+		if i not in sc:
+			addSli(i,i,col1)
+
+	for i in val.columns[num : 2*(num+1)]:
+		if i not in sc:
+			addSli(i,i,col2)
+
+	for i in val.columns[2*(num+1) :]:
+		if i not in sc:
+			addSli(i,i,col3)
+			
 
 
 def update():
 
 	val.hrv_MEAN_RR = hrv_MEAN_RR
 
-	#for i in sliders:	CODIGO PARA VARIAR EL RESTO DE VARIABLES DEPENDIENDO DE LAS QUE SE AÑADEN (PARECE FUNCIONAR BIEN PERO LA LINEAR REGRESION SE ROMPE
-	#	val[i[0]] = i[1]
-
-	#	for col in range(len(val.columns)):
-	#		if(corr[i[0]][col] != 1):
-	#			val[val.columns[col]] = val[val.columns[col]] + ((i[1]-meanVal[i[0]])*corr[i[0]][col])
-	#			if val[val.columns[col]][0] > maxVal[maxVal.columns[col]][0]:
-	#				val[val.columns[col]] = maxVal[maxVal.columns[col]]
-	#			elif val[val.columns[col]][0]< minVal[minVal.columns[col]][0]:
-	#				val[val.columns[col]] = minVal[minVal.columns[col]]
-
 	for i in sliders:
 		val[i[0]] = i[1]
 
+
+	val.hrv_KURT_SQUARE = val.hrv_KURT**2
+	val.eda_MEAN_2ND_GRAD_CUBE = val.eda_MEAN_2ND_GRAD ** 3
 
 	val.baseline = 1 if state == "Normal" else 0
 	val.amusement = 1 if state == "Emocionado" else 0
@@ -78,5 +116,10 @@ if st.button('Predict'):
 			st.write('''
 			## Results 🔍 
 			''')
-			st.text(f"De acuerdo a nuestro mejor modelo, un random forest el nivel de estres es: {int(rf.predict(val))}")
-			st.text(f"Otros modelos sujieren: {int(dt.predict(val))} y {int(lr.predict(val))}")
+			nStress = int(rf.predict(val))
+			if nStress < 3:
+				st.text("Que estres ni estres, si te relajas más te quedas dormido")
+			elif nStress <5:
+				st.text("Nivel de estres normal")
+			else:
+				st.text("Nivel de estres alto, deberias relajarte")
