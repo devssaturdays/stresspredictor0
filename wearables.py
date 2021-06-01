@@ -35,7 +35,7 @@ def stress_o_meter(level):
 		</style>
 		<center>
 		<div>
-			<img src="https://drive.google.com/uc?export=view&id=1tzzDAZxoFpzsEIWfdH6dfetcyeE0TdAV" id="level">
+			<img src="https://github.com/devssaturdays/stresspredictor0/blob/main/sem.png" id="level">
 			<br>
 			<img src="https://drive.google.com/uc?export=view&id=1XmIuIxpmMRjw3Xf6e9AqO7pgrMx274w_" id="arrow">
 		</div>
