@@ -17,25 +17,81 @@ val = joblib.load("meanVal.pkl")
 val = pd.DataFrame(val)
 
 
-import streamlit as st 
+import streamlit as st
 
+
+def stress_o_meter(level):
+	return '''<style type="text/css">
+			#arrow{
+				position: relative;
+				height: 30vh;
+				width: 10vw;
+				top: -6em;
+			}
+			#level{
+				height: 5em;
+				width: 15em;
+			}
+		</style>
+		<center>
+		<div>
+			<img src="https://drive.google.com/uc?export=view&id=1tzzDAZxoFpzsEIWfdH6dfetcyeE0TdAV" id="level">
+			<br>
+			<img src="https://drive.google.com/uc?export=view&id=1XmIuIxpmMRjw3Xf6e9AqO7pgrMx274w_" id="arrow">
+		</div>
+		</center>
+
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="crossorigin="anonymous"></script>
+
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$( "#arrow" ).animate({
+	    			left: "'''+str( 2.4*(level -3) +0.2 )+'''em",
+	  			}, 1500)
+			})
+		</script>'''
+
+
+st.set_page_config(layout="wide")
+
+st.markdown(
+	'''
+	<style>
+		div[data-testid='stHorizontalBlock'] div[role='slider']{
+			background-color : black
+		}
+	</style>''',unsafe_allow_html = True)
+
+
+
+st.markdown(
+	'''
+	<img src = 'https://saturdays.ai/wp-content/uploads/2021/01/logo.png' style = 'height : 10vh; position : absolute; right : 0; top : 8vh; margin : 0'>
+	''', 
+	unsafe_allow_html=True)
+
+st.title("Stress wearables")
 
 def rr_to_hb(rr):
 	rr = 1/rr
 	rr = rr*1000*60
 	return rr
 
-
-st.set_page_config(layout="wide")
-st.write("Stress Wearables")
-
 left, right = st.beta_columns(2)
 
-hrv_MEAN_RR = right.slider("Latidos por minuto", math.floor(rr_to_hb(minVal.hrv_MEAN_RR)), math.floor(rr_to_hb (maxVal.hrv_MEAN_RR)) + 1, step = 1)
+# ATENCION el maximo y el minimo se invierten al pasar de RR a BPM
+maxim = math.floor(rr_to_hb(minVal.hrv_MEAN_RR))
+minim = math.floor(rr_to_hb(maxVal.hrv_MEAN_RR))
+
+hrv_MEAN_RR = right.slider("Latidos por minuto", minim, maxim, step = 1, value = (minim + math.floor((maxim-minim)/2))   )
 hrv_MEAN_RR = 1/(hrv_MEAN_RR/1000/60)
 
+
 right.markdown(
-	"<center><img src ='https://upload.wikimedia.org/wikipedia/commons/e/e2/Polar_RC3_GPS_heart_rate_monitor_watch.JPG' style = 'width : 25%;'> <br> Image source: <a href = 'https://search.creativecommons.org/photos/2aaefd10-2fae-4df0-877d-c3adbca1f346'>Tristan Haskins</a></center", 
+	'''<center>
+		<img src ='https://drive.google.com/uc?export=view&id=1cTRxZladPbJfCCZIB5BIkfkZC1w0raSe' style = 'width : 32%;'> 
+		<br> Image by: <a href = 'https://search.creativecommons.org/photos/0716edd3-d6c3-43ea-a348-616a77ecacb3'>Bekathwia</a>
+	</center''', 
 	unsafe_allow_html=True)
 
 sliders = []
@@ -55,26 +111,30 @@ def addSli(var, text, place = None):
 	if place :
 		sliders.append([
 			var,
-			place.slider(text, minim, maxim, step = (maxim-minim)/10 )
+			place.slider(text, minim, maxim, step = (maxim-minim)/10, value = (maxim-minim)/2 + minim )
 			])
 
 	else:
 		sliders.append([
 			var,
-			st.slider(text, minim, maxim, step = (maxim-minim)/10 )
+			st.slider(text, minim, maxim, step = (maxim-minim)/10, value = (maxim-minim)/2 + minim )
 			])
 
 addSli("eda_MEAN", "Actividad electrodermica media", left)
 left.markdown(
-	"<center><img src ='https://live.staticflickr.com/7068/6949070181_592e6b60fd_b.jpg' style = 'width : 40%;'> <br> Image source: <a href = 'https://search.creativecommons.org/photos/fc29cf47-bfc5-4ea4-832e-36d8c58b5de6'>Nikki Pugh</a></center", 
+	'''<center>
+		<img src ='https://live.staticflickr.com/7068/6949070181_592e6b60fd_b.jpg' style = 'width : 40%;'> <br> 
+		Image by: <a href = 'https://search.creativecommons.org/photos/fc29cf47-bfc5-4ea4-832e-36d8c58b5de6'>Nikki Pugh</a>
+	</center''', 
 	unsafe_allow_html=True)
 
 
 sc = ["hrv_MEAN_RR", "eda_MEAN", "baseline", "meditation", "stress", "amusement", "hrv_KURT_SQUARE", "eda_MEAN_2ND_GRAD_CUBE"]   #special cases
 
-state = left.selectbox("Situación actual",("Normal","Emocionado", "Estresado", "Meditando"))
+center = st.beta_columns((1,2,1))
+state = center[1].selectbox("Situación actual",("Normal","Emocionado", "Estresado", "Meditando"))
 
-with st.beta_expander("Configuración avanzada"):
+with st.beta_expander("Configuración avanzada	(Permite acceder a todas las variables del modelo)"):
 	col1, col2, col3 = st.beta_columns(3)
 	num = len(val.columns)//3
 
@@ -108,7 +168,6 @@ def update():
 	val.stress = 1 if state == "Estresado" else 0
 	val.meditation = 1 if state == "Meditando" else 0
 
-
 if st.button('Predict'):
 			update()
 			
@@ -123,3 +182,4 @@ if st.button('Predict'):
 				st.text("Nivel de estres normal")
 			else:
 				st.text("Nivel de estres alto, deberias relajarte")
+			st.components.v1.html(stress_o_meter(nStress))
