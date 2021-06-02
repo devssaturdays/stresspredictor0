@@ -2,18 +2,17 @@ import joblib
 import math
 import pandas as pd
 
-dt = joblib.load("dt.pkl")  #Cargamos el arbol de decision
-rf = joblib.load("rf.pkl")  #Cargamos el random forest
-lr  = joblib.load("lr.pkl")  #Cargamos la linear regresion
-meanVal = joblib.load("meanVal.pkl")  #Cargamos los valores medios
+rf = joblib.load("models/rf.pkl")  #Cargamos el random forest
+
+meanVal = joblib.load("data/meanVal.pkl")  #Cargamos los valores medios
 meanVal = pd.DataFrame(meanVal)
-maxVal = joblib.load("maxVal.pkl")  #Cargamos los valores medios
+maxVal = joblib.load("data/maxVal.pkl")  #Cargamos los valores medios
 maxVal = pd.DataFrame(maxVal)
-minVal = joblib.load("minVal.pkl")  #Cargamos los valores medios
+minVal = joblib.load("data/minVal.pkl")  #Cargamos los valores medios
 minVal = pd.DataFrame(minVal)
-corr = joblib.load("correlations.pkl")
+corr = joblib.load("data/correlations.pkl")
 corr = dict(zip(meanVal.columns, corr))
-val = joblib.load("meanVal.pkl") 
+val = joblib.load("data/meanVal.pkl") 
 val = pd.DataFrame(val)
 
 
@@ -35,7 +34,7 @@ def stress_o_meter(level):
 		</style>
 		<center>
 		<div>
-			<img src="https://github.com/devssaturdays/stresspredictor0/blob/main/sem.png" id="level">
+			<img src="https://drive.google.com/uc?export=view&id=1tzzDAZxoFpzsEIWfdH6dfetcyeE0TdAV" id="level">
 			<br>
 			<img src="https://drive.google.com/uc?export=view&id=1XmIuIxpmMRjw3Xf6e9AqO7pgrMx274w_" id="arrow">
 		</div>
@@ -77,7 +76,7 @@ def rr_to_hb(rr):
 	rr = rr*1000*60
 	return rr
 
-left, right = st.beta_columns(2)
+left, mid, right = st.beta_columns((4,1,4))
 
 # ATENCION el maximo y el minimo se invierten al pasar de RR a BPM
 maxim = math.floor(rr_to_hb(minVal.hrv_MEAN_RR))
@@ -89,7 +88,7 @@ hrv_MEAN_RR = 1/(hrv_MEAN_RR/1000/60)
 
 right.markdown(
 	'''<center>
-		<img src ='https://drive.google.com/uc?export=view&id=1cTRxZladPbJfCCZIB5BIkfkZC1w0raSe' style = 'width : 32%;'> 
+		<img src = url('Images/hrv') style = 'width : 32%;'> 
 		<br> Image by: <a href = 'https://search.creativecommons.org/photos/0716edd3-d6c3-43ea-a348-616a77ecacb3'>Bekathwia</a>
 	</center''', 
 	unsafe_allow_html=True)
@@ -129,7 +128,7 @@ left.markdown(
 	unsafe_allow_html=True)
 
 
-sc = ["hrv_MEAN_RR", "eda_MEAN", "baseline", "meditation", "stress", "amusement", "hrv_KURT_SQUARE", "eda_MEAN_2ND_GRAD_CUBE"]   #special cases
+sc = ["hrv_MEAN_RR", "eda_MEAN", "baseline", "meditation", "stress", "amusement"]   #special cases
 
 center = st.beta_columns((1,2,1))
 state = center[1].selectbox("Situación actual",("Normal","Emocionado", "Estresado", "Meditando"))
@@ -160,9 +159,6 @@ def update():
 		val[i[0]] = i[1]
 
 
-	val.hrv_KURT_SQUARE = val.hrv_KURT**2
-	val.eda_MEAN_2ND_GRAD_CUBE = val.eda_MEAN_2ND_GRAD ** 3
-
 	val.baseline = 1 if state == "Normal" else 0
 	val.amusement = 1 if state == "Emocionado" else 0
 	val.stress = 1 if state == "Estresado" else 0
@@ -171,13 +167,12 @@ def update():
 if st.button('Predict'):
 			update()
 			
-			prediction = dt.predict(val)
 			st.write('''
 			## Results 🔍 
 			''')
 			nStress = int(rf.predict(val))
 			if nStress < 3:
-				st.text("Que estres ni estres, si te relajas más te quedas dormido")
+				st.text("Estres bajo")
 			elif nStress <5:
 				st.text("Nivel de estres normal")
 			else:

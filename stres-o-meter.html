@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<style type="text/css">
+		#arrow{
+			position: relative;
+			height: 15vh;
+			width: 15vw;
+			top: -25vh
+		}
+		#level{
+			height: 20vh;
+			width: 60%
+		}
+	</style>
+	<center>
+	<div>
+		<img src="sem.png" id="level">
+		<br>
+		<img src="arrow.png" id="arrow">
+	</div>
+	</center>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="crossorigin="anonymous"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$( "#arrow" ).animate({
+    			left: "13vw",
+  			}, 1500)
+		})
+	</script>
+
+</body>
+</html>
