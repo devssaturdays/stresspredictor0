@@ -88,7 +88,7 @@ hrv_MEAN_RR = 1/(hrv_MEAN_RR/1000/60)
 
 right.markdown(
 	'''<center>
-		<img src = url('Images/hrv') style = 'width : 32%;'> 
+		<img src ='https://drive.google.com/uc?export=view&id=1cTRxZladPbJfCCZIB5BIkfkZC1w0raSe' style = 'width : 32%;'> 
 		<br> Image by: <a href = 'https://search.creativecommons.org/photos/0716edd3-d6c3-43ea-a348-616a77ecacb3'>Bekathwia</a>
 	</center''', 
 	unsafe_allow_html=True)
